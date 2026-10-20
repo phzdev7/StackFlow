@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.mysql.cj.protocol.x.SyncFlushDeflaterOutputStream;
+
 import entities.DBConnection;
 import entities.Product;
 
@@ -41,6 +43,8 @@ public class Main {
 		    System.out.println(e.getMessage());
 		}
 		while(true) {
+		System.out.println("===============================================================================");
+
 		System.out.println("\n                                       MENU");
 		
 		System.out.println("\n1 - VER ITENS PARA COMPRAR");
@@ -64,7 +68,9 @@ public class Main {
 
 			    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
 			    int quantidade = 0;
+			    System.out.println("\n                    ITENS");
 			    while (resultado.next()) {
+			    	
 			        int id = resultado.getInt("id");
 			        String nome = resultado.getString("nome");
 			        double preco = resultado.getDouble("preco");
@@ -115,9 +121,12 @@ public class Main {
 			    
 			}
 			
-			//GERENTEEEEEEEEE 
-			boolean menuGerenteAtivo = true;
+			//GERENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+			
+			boolean menuGerenteAtivo = true;			
+
 			while(menuGerenteAtivo) {
+
 			System.out.println("\n                                       MENU");
 			System.out.println("\n1 - CADASTRAR PRODUTO");
 			System.out.println("2 - LISTAR PRODUTOS");
@@ -174,7 +183,9 @@ public class Main {
 
 				    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
 				    int quantidade = 0;
+				    System.out.println("\n                    ITENS");
 				    while (resultado.next()) {
+				    	
 				        int id = resultado.getInt("id");
 				        nome = resultado.getString("nome");
 				        preco = resultado.getBigDecimal("preco");
@@ -206,7 +217,9 @@ public class Main {
 
 				    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
 				    int quantidade = 0;
+				    System.out.println("\n                    ITENS");
 				    while (resultado.next()) {
+				    	
 				        int id = resultado.getInt("id");
 				        nome = resultado.getString("nome");
 				        preco = resultado.getBigDecimal("preco");
@@ -225,7 +238,7 @@ public class Main {
 				} catch (SQLException e) {
 				    System.out.println("Erro ao buscar produtos: " + e.getMessage());
 				}
-				System.out.println("item que deseja remover: #");
+				System.out.print("item que deseja remover: #");
 				long e = sc.nextLong();
 				
 				 sql = "DELETE FROM products WHERE id = ?";
@@ -249,7 +262,167 @@ public class Main {
 					break;
 			
 			case 4:
+				try {
+				    Connection conexao = DBConnection.conectar();
+
+				    Statement stmt = conexao.createStatement();
+
+				    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
+				    int quantidade = 0;
+				    System.out.println("\n                    ITENS");
+				    while (resultado.next()) {
+				    	
+				        int id = resultado.getInt("id");
+				        nome = resultado.getString("nome");
+				        preco = resultado.getBigDecimal("preco");
+				        estoque = resultado.getInt("estoque");
+
+
+				        System.out.println("#" +  id + " - " + nome
+				        		+ " | R$ " + preco
+				        		+ " | Estoque: " + estoque);
+
+				        quantidade++;
+				    }
+				    if (quantidade == 0) {
+				        System.out.println("Nenhum produto disponível no momento.");
+				    }
+				} catch (SQLException o ) {
+				    System.out.println("Erro ao buscar produtos: " + o.getMessage());
+				}
+			System.out.println("===============================================================================");
+
+			System.out.print("Codigo do item que deseja alterar: #");
+			int item = sc.nextInt();
+			
+			System.out.println("\n1 - ALTERAR NOME");
+			System.out.println("2 - ALTERAR PREÇO");
+			System.out.println("3 - ALTERAR ESTOQUE");
+			System.out.print("RESPOSTA: ");	
+			int r = sc.nextInt();
+			System.out.println("===============================================================================");
+			
+			switch(r) {
+					case 1:
+						try {
+							Connection conexao = DBConnection.conectar();    //CONEXAO ENTRE O DATA BASE
+							sc.nextLine();
+							System.out.print("Novo Produto: ");
+							String novo = sc.nextLine();
+							
+							sql = "UPDATE products SET nome = ? WHERE id = ?";
+							PreparedStatement smt = conexao.prepareStatement(sql);
+							
+							smt.setString(1, novo);
+							smt.setInt(2, item);
+							
+							int linhas = smt.executeUpdate();
+							
+							if (linhas > 0) {
+							    System.out.println("Produto atualizado com sucesso!");
+							} else {
+							    System.out.println("Nenhum produto encontrado com esse ID.");
+							}
+							
+						} catch(SQLException i) {
+							System.out.println("Erro: " + i.getMessage());
+						}
+						break;
+					case 2:
+						try {
+							Connection conexao = DBConnection.conectar();
+							System.out.print("Novo Preço: R$");
+							BigDecimal novoPreco = sc.nextBigDecimal();
+							
+							sql = "UPDATE products SET preco = ? WHERE id = ?";
+							
+							PreparedStatement smt = conexao.prepareStatement(sql);
+							
+							smt.setBigDecimal(1, novoPreco);
+							smt.setInt(2, item);
+							
+							int linhas = smt.executeUpdate();
+							
+							if (linhas > 0) {
+							    System.out.println("Produto atualizado com sucesso!");
+							} else {
+							    System.out.println("Nenhum produto encontrado com esse ID.");
+							}
+							
+						}catch(SQLException q) {
+							System.out.println("Erro: " + q.getMessage());
+							
+						}
+						break;
+					case 3:
+						try {
+						Connection conexao = DBConnection.conectar();
+						System.out.print("Novo Estoque: ");
+						int novoEstoque = sc.nextInt();
+						
+						sql = "UPDATE products SET estoque = ? WHERE id = ?";
+						PreparedStatement smt = conexao.prepareStatement(sql);
+						
+						smt.setInt(1, novoEstoque);
+						smt.setInt(2, item);
+						
+						int linhas = smt.executeUpdate();
+						
+						if (linhas > 0) {
+						    System.out.println("Produto atualizado com sucesso!");
+						} else {
+						    System.out.println("Nenhum produto encontrado com esse ID.");
+						}
+						
+						}catch(SQLException p) {
+							System.out.println("Erro: " + p.getMessage());
+						}
+						break;
+					}
+			case 5:			
+			
+			try {
+			Connection conexao = DBConnection.conectar();
 				
+			sc.nextLine();
+			System.out.print("Nome do Produto: ");
+			String busca = sc.nextLine();
+			sql = "SELECT * FROM products WHERE nome LIKE ?";
+			
+			PreparedStatement smt = conexao.prepareStatement(sql);
+			
+			smt.setString(1, "%" + busca + "%");
+			
+			ResultSet resultado = smt.executeQuery();
+			
+			boolean encontrou = false;
+			
+			 while (resultado.next()) {
+		            encontrou = true;
+
+		            int id = resultado.getInt("id");
+		            nome = resultado.getString("nome");
+		            preco = resultado.getBigDecimal("preco");
+		           estoque = resultado.getInt("estoque");
+
+		            System.out.println("#" + id + " - " + nome
+		                    + " | R$ " + preco
+		                    + " | Estoque: " + estoque);
+		        }
+
+		        if (!encontrou) {
+		            System.out.println("Nenhum produto encontrado.");
+		        }
+
+		    } catch (SQLException p) {
+		        System.out.println("Erro: " + p.getMessage());
+		    }
+		    break;
+			
+			
+			
+			
+			
 			
 			
 			
