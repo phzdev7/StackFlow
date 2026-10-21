@@ -1,4 +1,13 @@
+
+
 package main;
+//---------------------------------------------------
+// PROJETO: STACKFLOW STORE
+// LINGUAGEM: JAVA | BANCO: MYSQL
+// SISTEMA DE LOJA COM CARRINHO E CRUD DE PRODUTOS.
+// ÁREA DO CLIENTE E ÁREA DO GERENTE.
+// CHAVE DE ACESSO DO GERENTE: 300309
+//---------------------------------------------------
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -61,48 +70,137 @@ public class Main {
 		switch(escolha) {
 		
 		case 1: 
+			while(true) {
 			try {
-			    Connection conexao = DBConnection.conectar();
+				Connection conexao = DBConnection.conectar();
+					
+				sc.nextLine();
+				
+				System.out.print("Nome do Produto: ");
+				String busca = sc.nextLine();
+				String sql = "SELECT * FROM products WHERE nome LIKE ?";
+				
+				PreparedStatement smt = conexao.prepareStatement(sql);
+				
+				smt.setString(1, "%" + busca + "%");
+				
+				ResultSet resultado = smt.executeQuery();
+				
+				boolean encontrou = false;
+				
+				 while (resultado.next()) {
+			            encontrou = true;
 
-			    Statement stmt = conexao.createStatement();
+			            int id = resultado.getInt("id");
+			           String nome = resultado.getString("nome");
+			           BigDecimal preco = resultado.getBigDecimal("preco");
+			          int estoque = resultado.getInt("estoque");
 
-			    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
-			    int quantidade = 0;
-			    System.out.println("\n                    ITENS");
-			    while (resultado.next()) {
-			    	
-			        int id = resultado.getInt("id");
-			        String nome = resultado.getString("nome");
-			        double preco = resultado.getDouble("preco");
-			        int estoque = resultado.getInt("estoque");
+			            System.out.println("#" + id + " - " + nome
+			                    + " | R$ " + preco
+			                    + " | Estoque: " + estoque);
+			        }
 
+			        if (!encontrou) {
+			            System.out.println("Nenhum produto encontrado.");
+			        }
 
-			        System.out.println("#" +  id + " - " + nome
-			        		+ " | R$ " + preco
-			        		+ " | Estoque: " + estoque);
-
-			        quantidade++;
+			    } catch (SQLException p) {
+			        System.out.println("Erro: " + p.getMessage());
 			    }
-			    if (quantidade == 0) {
-			        System.out.println("Nenhum produto disponível no momento.");
-			    }
-			} catch (SQLException e) {
-			    System.out.println("Erro ao buscar produtos: " + e.getMessage());
+			   
 			}
+			
+		case 2:
+			
+			try {
+				while(true) {
+				Connection conexao = DBConnection.conectar();
+					
+				sc.nextLine();
+				
+				System.out.print("Nome do Produto: ");
+				String busca = sc.nextLine();
+				
+				
+				String sql = "SELECT * FROM products WHERE nome LIKE ?";
+				
+				PreparedStatement smt = conexao.prepareStatement(sql);
+				
+				smt.setString(1, "%" + busca + "%");
+				
+				ResultSet resultado = smt.executeQuery();
+				
+				boolean encontrou = false;
+				
+				 while (resultado.next()) {
+			            encontrou = true;
+
+			            int id = resultado.getInt("id");
+			           String nome = resultado.getString("nome");
+			           BigDecimal preco = resultado.getBigDecimal("preco");
+			          int estoque = resultado.getInt("estoque");
+
+			            System.out.println("#" + id + " - " + nome
+			                    + " | R$ " + preco
+			                    + " | Estoque: " + estoque);
+			        
+				 
+				 }
+				
+			        if (!encontrou) {
+			            System.out.println("Nenhum produto encontrado.");
+			        }
+			        
+					System.out.println("===============================================================================");
+					
+					System.out.println(" 0 PARA FINALIZAR");
+			        System.out.print("Digite o codigo do item: #");
+				    int code = sc.nextInt();
+				    	
+					if(code == 0) {
+			    		break;
+			    	}
+
+				    boolean encontrado = false;
+				    
+				     String sqlBusca = "SELECT * FROM products WHERE id = ?";
+				     PreparedStatement smtBusca = conexao.prepareStatement(sqlBusca);
+				     
+				     smtBusca.setInt(1, code);
+				     ResultSet produtoEncontrado = smtBusca.executeQuery();
+				     
+				     if (produtoEncontrado.next()) {
+				    	    encontrado = true;
+
+				    	    int id = produtoEncontrado.getInt("id");
+				    	    String nome = produtoEncontrado.getString("nome");
+				    	    BigDecimal preco = produtoEncontrado.getBigDecimal("preco");
+				    	    int estoque = produtoEncontrado.getInt("estoque");
+
+				    	    System.out.println("\nProduto selecionado: " + nome);
+				    	    System.out.println("Preço: R$ " + preco);
+				    	    System.out.println("Estoque disponível: " + estoque);
+				    	    
+				    	    System.out.println("\n         ITEM NO CARRINHO");
+							System.out.println("===============================================================================");
+						
+				    	} 
+				   
+				     
+				     
+				     else {
+							System.out.println("===============================================================================");
+				    	    System.out.println("Produto não encontrado.");
+				    	}
+				     
+					}
+			    } catch (SQLException p) {
+			        System.out.println("Erro: " + p.getMessage());
+			    }
+			
+			   
 			break;
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 		case 0:
 			System.out.println("Adeus!");
 			return;
@@ -126,6 +224,8 @@ public class Main {
 			boolean menuGerenteAtivo = true;			
 
 			while(menuGerenteAtivo) {
+			System.out.println("===============================================================================");
+
 
 			System.out.println("\n                                       MENU");
 			System.out.println("\n1 - CADASTRAR PRODUTO");
@@ -430,8 +530,10 @@ public class Main {
 			
 			
 			case 0:
+				System.out.println("Adeus gerente!");
 			    menuGerenteAtivo = false;
 			    break;
+			    
 			}
 				
 			}//AREA DO GERENTE	
