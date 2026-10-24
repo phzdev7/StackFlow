@@ -18,12 +18,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import com.mysql.cj.protocol.x.SyncFlushDeflaterOutputStream;
-
 import entities.DBConnection;
+import entities.ItemCarrinho;
 import entities.Product;
 
 public class Main {
+	
+	private static ArrayList<ItemCarrinho> carrinho = new ArrayList<>();
+		
 
 	public static void main(String[] args) {
 		
@@ -39,6 +41,7 @@ public class Main {
 		System.out.println("\n                                  STACKFLOW STORE");
 		System.out.println("\n===============================================================================");
 		
+		boolean entrarGerente = false;
 		
 		try {
 		    Connection conexao = DBConnection.conectar();
@@ -51,8 +54,9 @@ public class Main {
 		    System.out.println("Erro ao conectar com o banco:");
 		    System.out.println(e.getMessage());
 		}
-		while(true) {
 		System.out.println("===============================================================================");
+
+		while(true) {
 
 		System.out.println("\n                                       MENU");
 		
@@ -61,55 +65,56 @@ public class Main {
 		System.out.println("3 - REMOVER ITEM DA COMPRA ");
 		System.out.println("4 - FINALIZAR");
 		System.out.println("5 - ÁREA DO GERENTE");
+		System.out.println("6 - CARRINHO ");
 		System.out.println("0 - SAIR");
 		
 		System.out.println("===============================================================================");
 		System.out.print("Escolha: ");
 		int escolha = sc.nextInt();
 		System.out.println("===============================================================================");
+		
+		if(escolha != 1 && escolha !=  2 && escolha !=  3 && escolha !=  4 && escolha !=  5 && escolha !=  6 && escolha !=  0 ) {
+			System.out.println("RESPOSTA INVALIDA");
+			continue;
+		}
+		
+		
 		switch(escolha) {
 		
 		case 1: 
-			while(true) {
+				
 			try {
-				Connection conexao = DBConnection.conectar();
-					
-				sc.nextLine();
-				
-				System.out.print("Nome do Produto: ");
-				String busca = sc.nextLine();
-				String sql = "SELECT * FROM products WHERE nome LIKE ?";
-				
-				PreparedStatement smt = conexao.prepareStatement(sql);
-				
-				smt.setString(1, "%" + busca + "%");
-				
-				ResultSet resultado = smt.executeQuery();
-				
-				boolean encontrou = false;
-				
-				 while (resultado.next()) {
-			            encontrou = true;
+			    Connection conexao = DBConnection.conectar();
 
-			            int id = resultado.getInt("id");
-			           String nome = resultado.getString("nome");
-			           BigDecimal preco = resultado.getBigDecimal("preco");
-			          int estoque = resultado.getInt("estoque");
+			    Statement stmt = conexao.createStatement();
 
-			            System.out.println("#" + id + " - " + nome
-			                    + " | R$ " + preco
-			                    + " | Estoque: " + estoque);
-			        }
+			    ResultSet resultado = stmt.executeQuery("SELECT * FROM products");
+			    int quantidade = 0;
+			    System.out.println("\n                    ITENS");
+			    while (resultado.next()) {
+			    	
+			        int id = resultado.getInt("id");
+			        String nome = resultado.getString("nome");
+			        BigDecimal preco = resultado.getBigDecimal("preco");
+			        int estoque = resultado.getInt("estoque");
 
-			        if (!encontrou) {
-			            System.out.println("Nenhum produto encontrado.");
-			        }
 
-			    } catch (SQLException p) {
-			        System.out.println("Erro: " + p.getMessage());
+			        System.out.println("#" +  id + " - " + nome
+			        		+ " | R$ " + preco
+			        		+ " | Estoque: " + estoque);
+
+			        quantidade++;
 			    }
-			   
+			    if (quantidade == 0) {
+			        System.out.println("Nenhum produto disponível no momento.");
+			    }
+			} catch (SQLException e) {
+			    System.out.println("Erro ao buscar produtos: " + e.getMessage());
 			}
+		
+			break;
+		
+			
 			
 		case 2:
 			
@@ -136,9 +141,9 @@ public class Main {
 				 while (resultado.next()) {
 			            encontrou = true;
 
-			            int id = resultado.getInt("id");
-			           String nome = resultado.getString("nome");
-			           BigDecimal preco = resultado.getBigDecimal("preco");
+			          int id = resultado.getInt("id");
+			          String nome = resultado.getString("nome");
+			          BigDecimal preco = resultado.getBigDecimal("preco");
 			          int estoque = resultado.getInt("estoque");
 
 			            System.out.println("#" + id + " - " + nome
@@ -148,13 +153,14 @@ public class Main {
 				 
 				 }
 				
+				 
 			        if (!encontrou) {
 			            System.out.println("Nenhum produto encontrado.");
 			        }
 			        
 					System.out.println("===============================================================================");
 					
-					System.out.println(" 0 PARA FINALIZAR");
+					System.out.println(" 0 - PARA VOLTAR AO MENU");
 			        System.out.print("Digite o codigo do item: #");
 				    int code = sc.nextInt();
 				    	
@@ -177,18 +183,31 @@ public class Main {
 				    	    String nome = produtoEncontrado.getString("nome");
 				    	    BigDecimal preco = produtoEncontrado.getBigDecimal("preco");
 				    	    int estoque = produtoEncontrado.getInt("estoque");
-
-				    	    System.out.println("\nProduto selecionado: " + nome);
-				    	    System.out.println("Preço: R$ " + preco);
-				    	    System.out.println("Estoque disponível: " + estoque);
 				    	    
-				    	    System.out.println("\n         ITEM NO CARRINHO");
-							System.out.println("===============================================================================");
-						
-				    	} 
-				   
-				     
-				     
+				    	    System.out.print("Quantidade desejada: ");
+							 int quantidade = sc.nextInt();
+							 	if(quantidade <= 0) {
+							 		System.out.println("QUANTIDADE INVALIDA");
+							 	}else if(quantidade > estoque) {
+							 		System.out.println("ESTOQUE INSUFICIENTE!");
+							 	}else {
+							 		ItemCarrinho item = new ItemCarrinho(id, nome, preco, quantidade);
+							 		carrinho.add(item);
+							 		
+							 		System.out.println("\n===== CARRINHO =====");
+							 		
+							 		for (ItemCarrinho produtoCarrinho : carrinho) {
+							 		    System.out.println(
+							 		        produtoCarrinho.getNomeProduto()
+							 		        + " | Quantidade: " + produtoCarrinho.getQuantidadeProduto()
+							 		        + " | Preço unitário: R$ " + produtoCarrinho.getPrecoProduto()
+							 		    );
+							 		}
+							 		
+							 		}
+							 	}
+							 	
+				    
 				     else {
 							System.out.println("===============================================================================");
 				    	    System.out.println("Produto não encontrado.");
@@ -199,30 +218,50 @@ public class Main {
 			        System.out.println("Erro: " + p.getMessage());
 			    }
 			
-			   
 			break;
-		case 0:
-			System.out.println("Adeus!");
-			return;
+		
+				case 5:     //GERENTE
 			
-			
-		case 5: 
 			System.out.print("Senha do Gerente: ");
 			String senha = sc.next();
 			String pass = "300309";
+			
 			if (senha.equals(pass)) {
 			    System.out.println("Seja bem-vindo Gerente!");
-			    
+			    entrarGerente = true;
 			} else {
 			    System.out.println("Senha não autorizada");
 			    continue;
-			    
 			}
+			break;
+			case 6:         //CARRINHO
+				
+				if(carrinho.isEmpty()) {
+					System.out.println("CARRINHO VAZIO!");
+					break;
+				}
+				
+				System.out.println("\n====== MEU CARRINHO ======");
+				
+					for(ItemCarrinho produtoCarrinho : carrinho) {
+						System.out.println(produtoCarrinho.getNomeProduto()
+								+ "| Quantidade: " + produtoCarrinho.getQuantidadeProduto() 
+								+ "| Preço Unitário: " + produtoCarrinho.getPrecoProduto()); 
+					
 			
+					
+					}
+					
+					break;
+		}
+	
+		
+		
 			//GERENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 			
-			boolean menuGerenteAtivo = true;			
-
+					if(entrarGerente) {
+			boolean menuGerenteAtivo = true;	
+			
 			while(menuGerenteAtivo) {
 			System.out.println("===============================================================================");
 
@@ -241,7 +280,7 @@ public class Main {
 			System.out.print("Escolha: ");
 			escolha = sc.nextInt();
 			System.out.println("===============================================================================");
-			switch(escolha) {
+			switch(escolha) { 
 			
 			case 1:
 				
@@ -456,6 +495,7 @@ public class Main {
 						break;
 					case 3:
 						try {
+							
 						Connection conexao = DBConnection.conectar();
 						System.out.print("Novo Estoque: ");
 						int novoEstoque = sc.nextInt();
@@ -518,30 +558,27 @@ public class Main {
 		        System.out.println("Erro: " + p.getMessage());
 		    }
 		    break;
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+		
 			case 0:
 				System.out.println("Adeus gerente!");
 			    menuGerenteAtivo = false;
 			    break;
 			    
 			}
+			
 				
 			}//AREA DO GERENTE	
-				
-			}
+		    entrarGerente = false;
+					
+					}//IF GERENTE ATIVO
+		}
+		 }
 		
 		 }
-		 }
+		 
 	}
 
-}
+
+	
+
+
