@@ -63,9 +63,9 @@ public class Main {
 		System.out.println("\n1 - VER ITENS PARA COMPRAR");
 		System.out.println("2 - ADICIONAR AO CARRINHO");
 		System.out.println("3 - REMOVER ITEM DA COMPRA ");
-		System.out.println("4 - FINALIZAR");
-		System.out.println("5 - ÁREA DO GERENTE");
-		System.out.println("6 - CARRINHO ");
+		System.out.println("4 - CARRINHO");
+		System.out.println("5 - FINALIZAR COMPRA");
+		System.out.println("6 - ÁREA DO GERENTE ");
 		System.out.println("0 - SAIR");
 		
 		System.out.println("===============================================================================");
@@ -218,9 +218,71 @@ public class Main {
 			        System.out.println("Erro: " + p.getMessage());
 			    }
 			
+			
+		case 3:      //DELETAR ITEM DA COMPRA 
+		
+		
+		
+		 
+		case 4:         //CARRINHO
+				
+				if(carrinho.isEmpty()) {
+					System.out.println("CARRINHO VAZIO!");
+					break;
+				}
+				
+				System.out.println("\n                                       CARRINHO");
+				
+					for(ItemCarrinho produtoCarrinho : carrinho) {
+						System.out.println(produtoCarrinho.getNomeProduto()
+								+ "| Quantidade: " + produtoCarrinho.getQuantidadeProduto() 
+								+ "| Preço Unitário: " + produtoCarrinho.getPrecoProduto()); 
+					
+					}
+					
+				
+					
+		case 5:    //FINALIZAR COMPRA		
+			
+			if(carrinho.isEmpty()) {
+				System.out.println("CARRINHO VAZIO!");
+				break;
+			}
+			
+			System.out.println("\n                                       CARRINHO");
+			
+			for(ItemCarrinho produtoCarrinho : carrinho) {
+				System.out.println(produtoCarrinho.getNomeProduto()
+						+ "| Quantidade: " + produtoCarrinho.getQuantidadeProduto() 
+						+ "| Preço Unitário: " + produtoCarrinho.getPrecoProduto()); 
+			
+				
+			}
+			
+			BigDecimal total = BigDecimal.ZERO;
+			
+			for (ItemCarrinho produtoCarrinho : carrinho) {
+				BigDecimal subTotal = produtoCarrinho.getPrecoProduto()
+						.multiply(BigDecimal.valueOf(produtoCarrinho.getQuantidadeProduto()));
+				
+				total = total.add(subTotal);
+			}
+			
+			System.out.println("VALOR A PAGAR: R$" + total);
+			
+			
+			
+			
+			
+			
+			
+			
+					
+					
+					
 			break;
 		
-				case 5:     //GERENTE
+				case 6:     //ÁREA DO GERENTE
 			
 			System.out.print("Senha do Gerente: ");
 			String senha = sc.next();
@@ -234,27 +296,39 @@ public class Main {
 			    continue;
 			}
 			break;
-			case 6:         //CARRINHO
-				
-				if(carrinho.isEmpty()) {
-					System.out.println("CARRINHO VAZIO!");
-					break;
-				}
-				
-				System.out.println("\n====== MEU CARRINHO ======");
-				
-					for(ItemCarrinho produtoCarrinho : carrinho) {
-						System.out.println(produtoCarrinho.getNomeProduto()
-								+ "| Quantidade: " + produtoCarrinho.getQuantidadeProduto() 
-								+ "| Preço Unitário: " + produtoCarrinho.getPrecoProduto()); 
-					
 			
-					
-					}
-					
-					break;
 		}
 	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 			//GERENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
