@@ -218,7 +218,7 @@ public class Main {
 			        System.out.println("Erro: " + p.getMessage());
 			    }
 			
-			
+			break;
 		case 3:      //DELETAR ITEM DA COMPRA 
 		
 		
@@ -240,9 +240,14 @@ public class Main {
 					
 					}
 					
-				
+				break;
 					
-		case 5:    //FINALIZAR COMPRA		
+		case 5:    //FINALIZAR COMPRA	
+			
+			//BIGDECIMAL.ZERO == COMEÇA O TOTAL EM ZERO
+			//MULTIPLY == MULTIPLICA PREÇO PELA QUANTIDADE
+			//ADD == SOMA O SUBTOTAL AO TOTAL ACOMULADO
+		
 			
 			if(carrinho.isEmpty()) {
 				System.out.println("CARRINHO VAZIO!");
@@ -268,11 +273,169 @@ public class Main {
 				total = total.add(subTotal);
 			}
 			
-			System.out.println("VALOR A PAGAR: R$" + total);
 			
 			
+			System.out.println("===============================================================================");
+			System.out.println("\n                                  STACKFLOW STORE PAGAMENTO");
+			System.out.println("\n===============================================================================");
+			System.out.println("\n1 - PIX");
+			System.out.println("2 - CREDITO/ DEBITO");
+			System.out.println("3 - DINHEIRO");
+			System.out.println("0 - VOLTAR AO CARRINHO");
+			
+			System.out.println("\nVALOR A PAGAR: R$" + total);
+			
+			System.out.print("\nESCOLHA: ");
+			int e = sc.nextInt();
 			
 			
+			switch(e) {
+			case 1:
+				System.out.println("|--------------------------------------------|");
+				System.out.println("|                   PIX                      |");
+				System.out.println("|--------------------------------------------|");
+				System.out.println("|                                            |");
+				System.out.println("|          ██▀▀▀▀▀██  ▄▀█  ██▀▀▀▀▀██         |");
+				System.out.println("|          ██ ███ ██  ▀▄█  ██ ███ ██         |");
+				System.out.println("|          ██ ▀▀▀ ██  █▀█  ██ ▀▀▀ ██         |");
+				System.out.println("|          ▀▀▀▀▀▀▀▀▀  ▀ ▀  ▀▀▀▀▀▀▀▀▀         |");
+				System.out.println("|             ▄██▄   ██▀▄   ▄██▄             |");
+				System.out.println("|          ██▀▀▀▀▀██  ▄██  ██▀▀▀▀▀██         |");
+				System.out.println("|          ██ ███ ██  ▀██  ██ ███ ██         |");
+				System.out.println("|          ██ ▀▀▀ ██  ▄▀█  ██ ▀▀▀ ██         |");
+				System.out.println("|          ▀▀▀▀▀▀▀▀▀  ▀▀▀  ▀▀▀▀▀▀▀▀▀         |");
+				System.out.println("|                                            |");
+				System.out.println("|TOTAL: R$ " + total +"                             |");
+				System.out.println("|Aguardando confirmação do pagamento...      |");
+				System.out.println("|--------------------------------------------|");
+				
+				System.out.println("\n|--------------------------------------------|");
+				System.out.println("|                   FINALIZAR                |");
+				System.out.println("|--------------------------------------------|");
+				System.out.println("|      1 - SIM                               |");
+				System.out.println("|      2 - NAO                               |");
+				System.out.println("|      3 - MENU                              |");
+				System.out.println("|--------------------------------------------|");
+				
+				System.out.println("\nResposta: ");
+				int f = sc.nextInt();
+				
+				switch(f) {
+				
+				case 1:
+					System.out.println("|--------------------------------------------|");
+					System.out.println("|                  NOTINHA                    |");
+					System.out.println("|--------------------------------------------|");
+					System.out.println("|                 FORMA: PIX                 |");
+					System.out.println("|--------------------------------------------|");
+					System.out.println("|TOTAL: R$ " + total +"                             |");
+					System.out.println("|STATUS:  pagamento confirmado               |");
+					System.out.println("|--------------------------------------------|");
+					System.out.println("|                                            |");
+					System.out.println("|       OBRIGADO PELA PREFERÊNCIA!           |");
+					System.out.println("|          VOLTE SEMPRE!                     |");
+					System.out.println("|                                            |");
+					System.out.println("|--------------------------------------------|");
+					
+					carrinho.clear();
+					break;
+				case 2: 
+					System.out.println("COMPRA CANCELADA....CARRINHO LIMPO");
+					carrinho.clear();
+					break;
+				case 3: 
+					break;
+				}
+				
+			
+				break;
+				
+			case 2: // CARTAO
+
+			    System.out.println("|--------------------------------------------|");
+			    System.out.println("|              PAGAMENTO CARTÃO              |");
+			    System.out.println("|--------------------------------------------|");
+			    System.out.println("|                                            |");
+			    System.out.println("|       [1] CRÉDITO                          |");
+			    System.out.println("|       [2] DÉBITO                           |");
+			    System.out.println("|                                            |");
+			    System.out.println("|       [0] VOLTAR                           |");
+			    System.out.println("|                                            |");
+			    System.out.println("|--------------------------------------------|");
+				System.out.println("|  TOTAL: R$ " + total +"                           |");
+			    System.out.println("|--------------------------------------------|");
+
+			    System.out.print("ESCOLHA UMA OPÇÃO: ");
+			    int cartao = sc.nextInt();
+
+			    switch (cartao) {
+
+			        case 1:
+			            System.out.println("\nPAGAMENTO NO CRÉDITO SELECIONADO!");
+			            break;
+
+			        case 2:
+			            System.out.println("\nPAGAMENTO NO DÉBITO SELECIONADO!");
+			            break;
+
+			        case 0:
+			            System.out.println("VOLTANDO AO MENU DE PAGAMENTO...");
+			            break;
+
+			        default:
+			            System.out.println("OPÇÃO INVÁLIDA!");
+			            break;
+			    }
+
+			    if (cartao == 1 || cartao == 2) {
+
+			        System.out.println("\n|--------------------------------------------|");
+			        System.out.println("|             CONFIRMAÇÃO CARTÃO             |");
+			        System.out.println("|--------------------------------------------|");
+			        System.out.println("|                                            |");
+			        System.out.println("|       [1] SIM                              |");
+			        System.out.println("|       [2] NÃO                              |");
+			        System.out.println("|                                            |");
+			        System.out.println("|--------------------------------------------|");
+
+			        System.out.print("CONFIRMAR PAGAMENTO? ");
+			        int confirmar = sc.nextInt();
+
+			        if (confirmar == 1) {
+
+			            System.out.println("\n|--------------------------------------------|");
+			            System.out.println("|              STACKFLOW STORE               |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("|                                            |");
+			            System.out.println("|             COMPROVANTE DE VENDA           |");
+			            System.out.println("|                                            |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("| FORMA DE PAGAMENTO: " + (cartao == 1 ? "CRÉDITO" : "DÉBITO") + "                |");
+						System.out.println("| TOTAL: R$ " + total +"                            |");
+			            System.out.println("| STATUS: PAGAMENTO CONFIRMADO               |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("|       OBRIGADO PELA PREFERÊNCIA!           |");
+			            System.out.println("|--------------------------------------------|");
+
+			            // FUTURAMENTE: REGISTRAR VENDA NO BANCO
+			            // E ATUALIZAR O ESTOQUE.
+
+			            carrinho.clear();
+
+			        } else if (confirmar == 2) {
+
+			            System.out.println("PAGAMENTO NÃO CONFIRMADO.");
+			            System.out.println("SEU CARRINHO FOI MANTIDO.");
+
+			        } else {
+
+			            System.out.println("OPÇÃO INVÁLIDA.");
+			        }
+			    }
+
+			    break;
+			
+			}
 			
 			
 			
@@ -299,38 +462,6 @@ public class Main {
 			
 		}
 	
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 			//GERENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 			
 					if(entrarGerente) {
