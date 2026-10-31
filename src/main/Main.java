@@ -36,7 +36,6 @@ public class Main {
 		
 		
 		
-		
 		System.out.println("===============================================================================");
 		System.out.println("\n                                  STACKFLOW STORE");
 		System.out.println("\n===============================================================================");
@@ -432,9 +431,64 @@ public class Main {
 			            System.out.println("OPÇÃO INVÁLIDA.");
 			        }
 			    }
-
-			    break;
+			   break; 
+			case 3: //DINHEIRO
+				
 			
+
+			    System.out.println("|--------------------------------------------|");
+			    System.out.println("|             PAGAMENTO DINHEIRO             |");
+			    System.out.println("|--------------------------------------------|");
+			    System.out.println("|                                            |");
+			    System.out.println("|       TOTAL: R$ " + total);
+			    System.out.println("|                                            |");
+			    System.out.println("|       [1] CONFIRMAR PAGAMENTO              |");
+			    System.out.println("|       [2] CANCELAR                         |");
+			    System.out.println("|                                            |");
+			    System.out.println("|--------------------------------------------|");
+
+			    System.out.print("ESCOLHA UMA OPÇÃO: ");
+			    int dinheiro = sc.nextInt();
+
+			    switch (dinheiro) {
+
+			        case 1:
+
+			            System.out.println("\n|--------------------------------------------|");
+			            System.out.println("|              STACKFLOW STORE              |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("|                                            |");
+			            System.out.println("|              COMPROVANTE DE VENDA          |");
+			            System.out.println("|                                            |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("| FORMA DE PAGAMENTO: DINHEIRO               |");
+						System.out.println("| TOTAL: R$ " + total +"                            |");
+			            System.out.println("| STATUS: PAGAMENTO CONFIRMADO               |");
+			            System.out.println("|--------------------------------------------|");
+			            System.out.println("|       OBRIGADO PELA PREFERÊNCIA!           |");
+			            System.out.println("|--------------------------------------------|");
+
+			            // FUTURAMENTE: REGISTRAR VENDA NO BANCO
+			            // E ATUALIZAR O ESTOQUE.
+
+			            carrinho.clear();
+
+			            break;
+
+			        case 2:
+
+			            System.out.println("PAGAMENTO CANCELADO.");
+			            System.out.println("SEU CARRINHO FOI MANTIDO.");
+
+			            break;
+
+			        default:
+
+			            System.out.println("OPÇÃO INVÁLIDA!");
+
+			            break;
+			    }
+			    break;
 			}
 			
 			
