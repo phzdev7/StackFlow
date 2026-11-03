@@ -1,5 +1,3 @@
-
-
 package main;
 //---------------------------------------------------
 // PROJETO: STACKFLOW STORE
@@ -24,13 +22,128 @@ import entities.Product;
 
 public class Main {
 	
-	private static ArrayList<ItemCarrinho> carrinho = new ArrayList<>();
-		
+
+private static ArrayList<ItemCarrinho> carrinho = new ArrayList<>();
+
+// CADASTRAR CLIENTE
+public static int cadastrarCliente(Connection conexao) throws SQLException {
+
+    String sql = "INSERT INTO clientes (nome) VALUES (?)";
+
+    try (PreparedStatement stmt = conexao.prepareStatement(
+            sql, Statement.RETURN_GENERATED_KEYS)) {
+
+        stmt.setString(1, "CLIENTE");
+
+        stmt.executeUpdate();
+
+        try (ResultSet resultado = stmt.getGeneratedKeys()) {
+
+            if (resultado.next()) {
+                return resultado.getInt(1);
+            }
+        }
+    }
+
+    throw new SQLException("Erro ao gerar ID do cliente.");
+}
+
+// REGISTRAR VENDA
+public static void registrarVenda(Connection conexao, BigDecimal total) throws SQLException {
+
+    boolean autoCommitOriginal = conexao.getAutoCommit();
+
+    try {
+
+        conexao.setAutoCommit(false);
+
+        // 1. CADASTRAR CLIENTE
+        int clienteId = cadastrarCliente(conexao);
+
+        // 2. REGISTRAR VENDA
+        String sqlVenda = "INSERT INTO vendas (cliente_id, total) VALUES (?, ?)";
+
+        int vendaId;
+
+        try (PreparedStatement stmt = conexao.prepareStatement(
+                sqlVenda, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setInt(1, clienteId);
+            stmt.setBigDecimal(2, total);
+
+            stmt.executeUpdate();
+
+            try (ResultSet resultado = stmt.getGeneratedKeys()) {
+
+                if (!resultado.next()) {
+                    throw new SQLException("Não foi possível gerar o ID da venda.");
+                }
+
+                vendaId = resultado.getInt(1);
+            }
+        }
+
+        // 3. REGISTRAR PRODUTOS
+        String sqlItem = """
+                INSERT INTO itens_venda
+                (venda_id, produto_id, quantidade, preco_unitario)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        String sqlEstoque = """
+                UPDATE products
+                SET estoque = estoque - ?
+                WHERE id = ? AND estoque >= ?
+                """;
+
+        for (ItemCarrinho item : carrinho) {
+
+            try (PreparedStatement stmt = conexao.prepareStatement(sqlItem)) {
+
+                stmt.setInt(1, vendaId);
+                stmt.setInt(2, item.getIdProduto());
+                stmt.setInt(3, item.getQuantidadeProduto());
+                stmt.setBigDecimal(4, item.getPrecoProduto());
+
+                stmt.executeUpdate();
+            }
+
+            // 4. ATUALIZAR ESTOQUE
+            try (PreparedStatement stmt = conexao.prepareStatement(sqlEstoque)) {
+
+                stmt.setInt(1, item.getQuantidadeProduto());
+                stmt.setInt(2, item.getIdProduto());
+                stmt.setInt(3, item.getQuantidadeProduto());
+
+                int linhasAfetadas = stmt.executeUpdate();
+
+                if (linhasAfetadas == 0) {
+                    throw new SQLException(
+                            "Estoque insuficiente ou produto não encontrado: "
+                            + item.getNomeProduto()
+                    );
+                }
+            }
+        }
+
+        // 5. CONFIRMAR VENDA
+        conexao.commit();
+
+    } catch (SQLException e) {
+
+        conexao.rollback();
+        throw e;
+
+    } finally {
+
+        conexao.setAutoCommit(autoCommitOriginal);
+    }
+}
 
 	public static void main(String[] args) {
 		
 		
-		 try (Scanner sc = new Scanner (System.in)){
+		try (Scanner sc = new Scanner (System.in)){
 		ArrayList<Product> produto = new ArrayList<>();
 		
 		
@@ -61,7 +174,7 @@ public class Main {
 		
 		System.out.println("\n1 - VER ITENS PARA COMPRAR");
 		System.out.println("2 - ADICIONAR AO CARRINHO");
-		System.out.println("3 - REMOVER ITEM DA COMPRA ");
+		System.out.println("3 - REMOVER ITEM/QUANTIDADE DA COMPRA ");
 		System.out.println("4 - CARRINHO");
 		System.out.println("5 - FINALIZAR COMPRA");
 		System.out.println("6 - ÁREA DO GERENTE ");
@@ -112,8 +225,6 @@ public class Main {
 			}
 		
 			break;
-		
-			
 			
 		case 2:
 			
@@ -218,11 +329,91 @@ public class Main {
 			    }
 			
 			break;
-		case 3:      //DELETAR ITEM DA COMPRA 
-		
-		
-		
-		 
+		case 3: // REMOVER ITEM DA COMPRA
+
+		    if (carrinho.isEmpty()) {
+		        System.out.println("CARRINHO VAZIO!");
+		        break;
+		    }
+
+		    System.out.println("\n              REMOVER ITEM DO CARRINHO");
+		    System.out.println("================================================");
+
+		    for (int i = 0; i < carrinho.size(); i++) {
+
+		        ItemCarrinho item = carrinho.get(i);
+
+		        System.out.println("[" + (i + 1) + "] " 
+		                + item.getNomeProduto()
+		                + " | Quantidade: " + item.getQuantidadeProduto()
+		                + " | Preço: R$ " + item.getPrecoProduto());
+		    }
+
+		    System.out.println("================================================");
+		    System.out.println("[0] VOLTAR");
+		    System.out.print("ESCOLHA O ITEM: ");
+
+		    int indice = sc.nextInt() - 1;
+
+		    if (indice == -1) {
+		        break;
+		    }
+
+		    if (indice < 0 || indice >= carrinho.size()) {
+		        System.out.println("ITEM INVALIDO!");
+		        break;
+		    }
+
+		    ItemCarrinho itemSelecionado = carrinho.get(indice);
+
+		    System.out.println("\n[1] REMOVER PRODUTO COMPLETAMENTE");
+		    System.out.println("[2] DIMINUIR QUANTIDADE");
+		    System.out.println("[0] VOLTAR");
+
+		    System.out.print("ESCOLHA: ");
+		    int opcao = sc.nextInt();
+
+		    switch (opcao) {
+
+		        case 1:
+
+		            carrinho.remove(indice);
+
+		            System.out.println("PRODUTO REMOVIDO DO CARRINHO!");
+
+		            break;
+
+		        case 2:
+
+		            if (itemSelecionado.getQuantidadeProduto() > 1) {
+
+		                itemSelecionado.diminuirQuantidade();
+
+		                System.out.println("QUANTIDADE DIMINUIDA!");
+
+		            } else {
+
+		                carrinho.remove(indice);
+
+		                System.out.println("PRODUTO REMOVIDO DO CARRINHO!");
+		            }
+
+		            break;
+
+		        case 0:
+
+		            System.out.println("OPERAÇÃO CANCELADA.");
+
+		            break;
+
+		        default:
+
+		            System.out.println("OPÇÃO INVALIDA!");
+
+		            break;
+		    }
+
+		 break;
 		case 4:         //CARRINHO
 				
 				if(carrinho.isEmpty()) {
@@ -316,12 +507,25 @@ public class Main {
 				System.out.println("|      3 - MENU                              |");
 				System.out.println("|--------------------------------------------|");
 				
-				System.out.println("\nResposta: ");
+				System.out.print("\nResposta: ");
 				int f = sc.nextInt();
 				
 				switch(f) {
 				
 				case 1:
+					
+					try (Connection conexao = DBConnection.conectar()) {
+
+				        registrarVenda(conexao, total);
+
+				        System.out.println("VENDA REGISTRADA NO BANCO COM SUCESSO!");
+
+				    } catch (SQLException erro) {
+
+				        System.out.println("ERRO AO REGISTRAR VENDA: " + erro.getMessage());
+				        break;
+				    }
+					
 					System.out.println("|--------------------------------------------|");
 					System.out.println("|                  NOTINHA                    |");
 					System.out.println("|--------------------------------------------|");
@@ -479,7 +683,6 @@ public class Main {
 
 			            System.out.println("PAGAMENTO CANCELADO.");
 			            System.out.println("SEU CARRINHO FOI MANTIDO.");
-
 			            break;
 
 			        default:
@@ -489,16 +692,8 @@ public class Main {
 			            break;
 			    }
 			    break;
-			}
-			
-			
-			
-			
-					
-					
-					
+			}	
 			break;
-		
 				case 6:     //ÁREA DO GERENTE
 			
 			System.out.print("Senha do Gerente: ");
@@ -515,9 +710,7 @@ public class Main {
 			break;
 			
 		}
-	
 			//GERENTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-			
 					if(entrarGerente) {
 			boolean menuGerenteAtivo = true;	
 			
@@ -817,6 +1010,76 @@ public class Main {
 		        System.out.println("Erro: " + p.getMessage());
 		    }
 		    break;
+		 
+			case 6:
+
+			    String sqlHistorico = """
+			            SELECT v.id, c.id AS cliente_id, v.data_venda, v.total
+			            FROM vendas v
+			            INNER JOIN clientes c ON v.cliente_id = c.id
+			            ORDER BY v.data_venda DESC
+			            """;
+
+			    try (Connection conexao = DBConnection.conectar();
+			         PreparedStatement stmt = conexao.prepareStatement(sqlHistorico);
+			         ResultSet resultado = stmt.executeQuery()) {
+
+			        System.out.println("\n========== HISTÓRICO DE VENDAS ==========");
+
+			        boolean encontrou = false;
+
+			        while (resultado.next()) {
+			            encontrou = true;
+
+			            System.out.println("\nVenda #" + resultado.getInt("id"));
+			            System.out.println("Cliente #" + resultado.getInt("cliente_id"));
+			            System.out.println("Data: " + resultado.getString("data_venda"));
+			            System.out.println("Total: R$ " + resultado.getBigDecimal("total"));
+			            System.out.println("-----------------------------------------");
+			        }
+
+			        if (!encontrou) {
+			            System.out.println("Nenhuma venda registrada.");
+			        }
+
+			    } catch (SQLException ex) {
+			        System.out.println("Erro ao consultar vendas: " + ex.getMessage());
+			    }
+				break;
+				
+				
+			case 7: // RELATÓRIO DA LOJA
+
+			    String sqlRelatorio = """
+			            SELECT
+			                COUNT(*) AS quantidade_vendas,
+			                COALESCE(SUM(total), 0) AS faturamento,
+			                COALESCE(AVG(total), 0) AS ticket_medio
+			            FROM vendas
+			            """;
+
+			    try (Connection conexao = DBConnection.conectar();
+			         PreparedStatement stmt = conexao.prepareStatement(sqlRelatorio);
+			         ResultSet resultado = stmt.executeQuery()) {
+
+			        if (resultado.next()) {
+
+			            int quantidadeVendas = resultado.getInt("quantidade_vendas");
+			            BigDecimal faturamento = resultado.getBigDecimal("faturamento");
+			            BigDecimal ticketMedio = resultado.getBigDecimal("ticket_medio");
+
+			            System.out.println("\n========== RELATÓRIO DA LOJA ==========");
+			            System.out.println("Total de vendas: " + quantidadeVendas);
+			            System.out.println("Faturamento: R$ " + faturamento);
+			            System.out.println("Ticket médio: R$ " + ticketMedio);
+			            System.out.println("=======================================");
+			        }
+
+			    } catch (SQLException ex) {
+			        System.out.println("Erro ao gerar relatório: " + ex.getMessage());
+			    }
+
+				break;
 		
 			case 0:
 				System.out.println("Adeus gerente!");
@@ -836,8 +1099,3 @@ public class Main {
 		 }
 		 
 	}
-
-
-	
-
-
