@@ -42,5 +42,7 @@ public class ItemCarrinho {
 		this.quantidadeProduto = quantidadeProduto;
 	}
 	
-	
+	public void diminuirQuantidade() {
+	    quantidadeProduto--;
+	}
 }
